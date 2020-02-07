@@ -2,4 +2,8 @@ module github.com/jwhitaker/phloem
 
 go 1.13
 
-require github.com/gorilla/mux v1.7.3
+require (
+	github.com/confluentinc/confluent-kafka-go v1.3.0
+	github.com/google/uuid v1.1.1
+	github.com/gorilla/mux v1.7.3
+)
