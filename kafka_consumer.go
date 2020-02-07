@@ -2,15 +2,18 @@ package phloem
 
 import (
 	"fmt"
+	"encoding/json"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 	"os"
 )
 
+// KafkaConsumer is a struct for a KafkaConsumer
 type KafkaConsumer struct {
 	consumer *kafka.Consumer
 }
 
+// NewKafkaConsumer returns a new kafka consumer
 func NewKafkaConsumer() KafkaConsumer {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": "localhost",
@@ -27,6 +30,7 @@ func NewKafkaConsumer() KafkaConsumer {
 	return KafkaConsumer{ consumer }
 }
 
+// Subscribe to the following events
 func (kafkaConsumer KafkaConsumer) Subscribe(eventIds []EventIdentifier) {
 	// Get the event ids
 	// create a map with all the values as key
@@ -47,6 +51,7 @@ func (kafkaConsumer KafkaConsumer) Subscribe(eventIds []EventIdentifier) {
 	log.Printf("Consuming %+v", topics)
 }
 
+// Poll retrieve the next available event from Kafka
 func (kafkaConsumer KafkaConsumer) Poll() *Event {
 	timeoutMs := 1000
 
@@ -58,10 +63,16 @@ func (kafkaConsumer KafkaConsumer) Poll() *Event {
 
 	switch e := ev.(type) {
 	case *kafka.Message:
-		e.String()
+		log.Printf("%+s\n", e.Value)
 		log.Println("Here is a message")
 
-		return &Event {}
+		var event Event
+
+		json.Unmarshal(e.Value, &event)
+
+		log.Printf("%s\n", event)
+
+		return &event
 
 	case kafka.Error:
 		fmt.Fprintf(os.Stderr, "%% Error: %v: %v\n", e.Code(), e)
@@ -73,6 +84,7 @@ func (kafkaConsumer KafkaConsumer) Poll() *Event {
 	return nil
 }
 
+// Close close the consumer connection to kafka.
 func (kafkaConsumer KafkaConsumer) Close() {
 	kafkaConsumer.consumer.Close()
 }

@@ -2,6 +2,7 @@ package phloem
 
 import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"encoding/json"
 	"log"
 )
 
@@ -27,14 +28,21 @@ func (kafkaProducer KafkaProducer) Send(event Event) {
 	deliveryChan := make(chan kafka.Event)
 	defer close(deliveryChan)
 
-	value := "Hello WOrld"
+	rawPayload, err := json.Marshal(event)
+
+	log.Printf("%s", rawPayload)
+
+	if err != nil {
+		log.Println("Failed to incode message")
+		return
+	}
 
 	_ = kafkaProducer.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{
 			Topic: &event.Event.Aggregate,
 			Partition: kafka.PartitionAny,
 		},
-		Value: []byte(value),
+		Value: rawPayload,
 		Headers: []kafka.Header{{Key: "myTestHeader", Value: []byte("header values are binary")}},
 	}, deliveryChan)
 
