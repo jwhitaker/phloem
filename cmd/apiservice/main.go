@@ -1,36 +1,21 @@
 package main
 
 import (
+	"github.com/jwhitaker/phloem/internal/app/apiservice"
 	"log"
 
 	"github.com/jwhitaker/phloem/internal/pkg/phloem"
 	"github.com/jwhitaker/phloem/internal/pkg/recipe"
 )
 
-func recipeCreated(event *phloem.Event) {
-	log.Printf("save recipe created")
-
-	var rec recipe.Recipe
-
-	err := event.GetPayload(&rec)
-
-	if err != nil {
-		log.Printf("Failed to get payload", err)
-	}
-
-	log.Printf("%s", rec)
-}
-
-func recipeUpdated(event *phloem.Event) {
-
-}
-
 func main() {
 	consumer := phloem.NewKafkaConsumer()
 
+	service := apiservice.NewApiService()
+
 	router := phloem.NewEventRouter()
-	router.AddHandler(recipe.RECIPE_CREATED, recipeCreated)
-	router.AddHandler(recipe.RECIPE_UPDATED, recipeUpdated)
+	router.AddHandler(recipe.RECIPE_CREATED, service.RecipeCreated)
+	router.AddHandler(recipe.RECIPE_UPDATED, service.RecipeUpdated)
 
 	phloem.ListenAndRoute(consumer, router)
 
