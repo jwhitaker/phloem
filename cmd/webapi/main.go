@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"net/http"
+	"github.com/jwhitaker/phloem/internal/pkg/commons"
+	
 
 	"github.com/gorilla/mux"
 	"github.com/jwhitaker/phloem/internal/app/webapi"
@@ -13,7 +15,11 @@ import (
 func main() {
 	log.Println("Starting server")
 
-	producer := phloem.NewKafkaProducer()
+	var appConfiguration AppConfiguration
+
+	commons.LoadConfiguration(&appConfiguration)
+
+	producer := phloem.NewKafkaProducer(appConfiguration.KafkaConfiguration)
 
 	recipeController := webapi.NewRecipeController(producer)
 
@@ -21,5 +27,6 @@ func main() {
 	router.HandleFunc("/recipe", recipeController.SaveRecipe).
 		Methods("POST")
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Println("Server started")
+	log.Fatal(http.ListenAndServe(appConfiguration.ListenAddress, router))
 }

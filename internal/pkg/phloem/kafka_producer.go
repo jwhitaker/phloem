@@ -12,9 +12,9 @@ type KafkaProducer struct {
 }
 
 // NewKafkaProducer creates a new KafkaProducer instance
-func NewKafkaProducer() KafkaProducer {
+func NewKafkaProducer(configuration KafkaConfiguration) KafkaProducer {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap {
-		"bootstrap.servers": "localhost",
+		"bootstrap.servers": configuration.BootstrapServers,
 	})
 
 	if err != nil {
