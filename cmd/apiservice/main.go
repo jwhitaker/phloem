@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/jwhitaker/phloem"
-	"github.com/jwhitaker/phloem/internal/recipe"
+	"github.com/jwhitaker/phloem/internal/pkg/phloem"
+	"github.com/jwhitaker/phloem/internal/pkg/recipe"
 )
 
 func recipeCreated(event *phloem.Event) {
