@@ -40,7 +40,7 @@ func (recipeController RecipeController) SaveRecipe(w http.ResponseWriter, r *ht
 	rec.DateCreated = getNow()
 	rec.DateModified = getNow()
 
-	event, _ := phloem.NewEvent(recipe.RECIPE_CREATED, rec)
+	event, _ := recipe.NewRecipeCreatedEvent(rec)
 
 	recipeController.producer.Send(*event)
 
