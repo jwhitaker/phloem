@@ -6,22 +6,25 @@ import (
 	"log"
 )
 
+// KafkaProducer defines a Kafka version of a producer
 type KafkaProducer struct {
 	producer *kafka.Producer
 }
 
+// NewKafkaProducer creates a new KafkaProducer instance
 func NewKafkaProducer() KafkaProducer {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap {
 		"bootstrap.servers": "localhost",
 	})
 
 	if err != nil {
-		log.Fatal("Failed to create producer: %s\n", err)
+		log.Fatalf("Failed to create producer: %s\n", err)
 	}
 
 	return KafkaProducer{ producer }
 }
 
+// Send will send a event with the payload
 func (kafkaProducer KafkaProducer) Send(event string, payload interface{}) {
 	log.Printf("Sending %+v\n", event)
 

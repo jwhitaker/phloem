@@ -7,8 +7,7 @@ import (
 	"syscall"
 )
 
-// Listen will startup the listening process
-
+// ListenAndRoute will startup the listening process
 func ListenAndRoute(consumer Consumer, eventRouter EventRouter) {
 	log.Printf("Starting up event service")
 

@@ -8,6 +8,7 @@ type Event struct {
 	Payload []byte
 }
 
+// NewEvent creates a new event
 func NewEvent(event string, payload interface{}) (*Event, error) {
 	rawPayload, err := json.Marshal(payload)
 
@@ -21,6 +22,7 @@ func NewEvent(event string, payload interface{}) (*Event, error) {
 	}, nil
 }
 
+// GetPayload gets the payload from an event
 func (event Event) GetPayload(obj interface{}) error {
 	return json.Unmarshal([]byte(event.Payload), obj)
 }
