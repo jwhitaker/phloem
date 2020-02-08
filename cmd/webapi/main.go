@@ -3,13 +3,13 @@ package main
 import (
 	"log"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/jwhitaker/phloem"
+	"github.com/jwhitaker/phloem/internal/recipe"
 	"github.com/google/uuid"
 )
 
@@ -20,47 +20,29 @@ func getNow() int64 {
 	return nano / 1000
 }
 
-type RecipeRepository struct {
-}
-
-func (RecipeRepository) SaveRecipe(recipe Recipe) {
-	log.Println("Saving recipe...")
-}
-
-type Recipe struct {
-	Id string
-	Name string
-	DateCreated int64
-	DateModified int64
-}
-
-func homeLink(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Done!")
-}
-
 type RecipeController struct {
 	producer phloem.Producer
 }
 
 func (recipeController RecipeController) SaveRecipe(w http.ResponseWriter, r *http.Request) {
-	var recipe Recipe
+	var rec recipe.Recipe
 
-	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&rec); err != nil {
 		log.Printf("Could not parse payload: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	recipe.Id = uuid.New().String()
-	recipe.DateCreated = getNow()
-	recipe.DateModified = getNow()
+	rec.Id = uuid.New().String()
+	rec.DateCreated = getNow()
+	rec.DateModified = getNow()
 
-	recipeController.producer.Send(phloem.Event{ phloem.EventIdentifier { "recipeCreated", "recipe" }, recipe })
+	recipeController.producer.Send(recipe.RECIPE_CREATED, rec)
 
-	w.Header().Add("Location", "/recipe/" + recipe.Id)
+	w.Header().Add("Location", "/recipe/" + rec.Id)
 	w.WriteHeader(http.StatusCreated)
 
-	json.NewEncoder(w).Encode(recipe)
+	json.NewEncoder(w).Encode(rec)
 
 	log.Println("Saved!")
 }
@@ -73,7 +55,6 @@ func main() {
 	recipeController := RecipeController { producer }
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", homeLink)
 	router.HandleFunc("/recipe", recipeController.SaveRecipe).
 		Methods("POST")
 	

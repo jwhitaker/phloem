@@ -2,7 +2,6 @@ package phloem
 
 import (
 	"fmt"
-	"encoding/json"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 	"os"
@@ -31,24 +30,10 @@ func NewKafkaConsumer() KafkaConsumer {
 }
 
 // Subscribe to the following events
-func (kafkaConsumer KafkaConsumer) Subscribe(eventIds []EventIdentifier) {
-	// Get the event ids
-	// create a map with all the values as key
-	uniqMap := make(map[string]struct{})
+func (kafkaConsumer KafkaConsumer) Subscribe(events []string) {
+	kafkaConsumer.consumer.SubscribeTopics(events, nil)
 
-	for _, v := range eventIds {
-		uniqMap[v.Aggregate] = struct{}{}
-	}
-
-	topics := make([]string, 0, len(uniqMap))
-
-	for v := range uniqMap {
-		topics = append(topics, v)
-	}
-
-	kafkaConsumer.consumer.SubscribeTopics(topics, nil)
-
-	log.Printf("Consuming %+v", topics)
+	log.Printf("Consuming %+v", events)
 }
 
 // Poll retrieve the next available event from Kafka
@@ -63,14 +48,10 @@ func (kafkaConsumer KafkaConsumer) Poll() *Event {
 
 	switch e := ev.(type) {
 	case *kafka.Message:
-		log.Printf("%+s\n", e.Value)
-		log.Println("Here is a message")
-
-		var event Event
-
-		json.Unmarshal(e.Value, &event)
-
-		log.Printf("%s\n", event)
+		event := Event{
+			Event: *e.TopicPartition.Topic,
+			Payload: e.Value,
+		}
 
 		return &event
 
@@ -78,7 +59,7 @@ func (kafkaConsumer KafkaConsumer) Poll() *Event {
 		fmt.Fprintf(os.Stderr, "%% Error: %v: %v\n", e.Code(), e)
 
 	default:
-		fmt.Printf("Ignored %v\n", e)
+		log.Printf("Ignored %v\n", e)
 	}
 
 	return nil

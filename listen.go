@@ -30,6 +30,15 @@ func ListenAndRoute(consumer Consumer, eventRouter EventRouter) {
 			if ev == nil {
 				continue
 			}
+
+			handler, ok := eventRouter.GetHandler(ev.Event)
+
+			if !ok {
+				log.Printf("Could not find handler for %s.  Ignoring", ev.Event)
+				continue
+			}
+
+			handler(ev)
 		}
 	}
 

@@ -22,13 +22,13 @@ func NewKafkaProducer() KafkaProducer {
 	return KafkaProducer{ producer }
 }
 
-func (kafkaProducer KafkaProducer) Send(event Event) {
+func (kafkaProducer KafkaProducer) Send(event string, payload interface{}) {
 	log.Printf("Sending %+v\n", event)
 
 	deliveryChan := make(chan kafka.Event)
 	defer close(deliveryChan)
 
-	rawPayload, err := json.Marshal(event)
+	rawPayload, err := json.Marshal(payload)
 
 	log.Printf("%s", rawPayload)
 
@@ -39,11 +39,10 @@ func (kafkaProducer KafkaProducer) Send(event Event) {
 
 	_ = kafkaProducer.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{
-			Topic: &event.Event.Aggregate,
+			Topic: &event,
 			Partition: kafka.PartitionAny,
 		},
 		Value: rawPayload,
-		Headers: []kafka.Header{{Key: "myTestHeader", Value: []byte("header values are binary")}},
 	}, deliveryChan)
 
 	e := <- deliveryChan
