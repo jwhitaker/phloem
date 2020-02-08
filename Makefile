@@ -1,6 +1,6 @@
 CMDS = apiservice webapi
 
-all: $(CMDS) ## Build all commands
+build: $(CMDS) ## Build all commands
 
 $(CMDS): ## Build
 	go build -o ./bin/$@ ./cmd/$@
@@ -13,4 +13,3 @@ run:
 	
 gogo:
 	@docker-compose up -d
-
