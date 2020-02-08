@@ -1,7 +1,6 @@
 package phloem
 
 import (
-	"encoding/json"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 )
@@ -25,27 +24,28 @@ func NewKafkaProducer(configuration KafkaConfiguration) KafkaProducer {
 }
 
 // Send will send a event with the payload
-func (kafkaProducer KafkaProducer) Send(event string, payload interface{}) {
+//func (kafkaProducer KafkaProducer) Send(event string, payload interface{}) {
+func (kafkaProducer KafkaProducer) Send(event Event) {
 	log.Printf("Sending %+v\n", event)
 
 	deliveryChan := make(chan kafka.Event)
 	defer close(deliveryChan)
 
-	rawPayload, err := json.Marshal(payload)
+	//rawPayload, err := json.Marshal(event.Payload)
 
-	log.Printf("%s", rawPayload)
+	//log.Printf("%s", rawPayload)
 
-	if err != nil {
-		log.Println("Failed to encode message")
-		return
-	}
+	//if err != nil {
+	//	log.Println("Failed to encode message")
+	//	return
+	//}
 
 	_ = kafkaProducer.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{
-			Topic:     &event,
+			Topic:     &event.Event,
 			Partition: kafka.PartitionAny,
 		},
-		Value: rawPayload,
+		Value: event.Payload,
 	}, deliveryChan)
 
 	e := <-deliveryChan

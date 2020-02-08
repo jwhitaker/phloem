@@ -40,7 +40,9 @@ func (recipeController RecipeController) SaveRecipe(w http.ResponseWriter, r *ht
 	rec.DateCreated = getNow()
 	rec.DateModified = getNow()
 
-	recipeController.producer.Send(recipe.RECIPE_CREATED, rec)
+	event, _ := phloem.NewEvent(recipe.RECIPE_CREATED, rec)
+
+	recipeController.producer.Send(*event)
 
 	w.Header().Add("Location", "/recipe/"+rec.Id)
 	w.WriteHeader(http.StatusCreated)
