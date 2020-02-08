@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func LoadConfiguration(obj interface {}) {
+func LoadConfiguration(obj interface{}) {
 	err := envconfig.Process("APP", obj)
 
 	if err != nil {

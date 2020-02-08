@@ -3,9 +3,8 @@ package main
 import (
 	"log"
 
-	"net/http"
 	"github.com/jwhitaker/phloem/internal/pkg/commons"
-	
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/jwhitaker/phloem/internal/app/webapi"

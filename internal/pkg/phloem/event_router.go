@@ -11,7 +11,7 @@ type EventRouter struct {
 
 // NewEventRouter creates a new event router
 func NewEventRouter() EventRouter {
-	return EventRouter{ eventMappings {} }
+	return EventRouter{eventMappings{}}
 }
 
 // AddHandler adds an event handler for an event

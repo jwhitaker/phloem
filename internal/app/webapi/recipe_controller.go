@@ -19,15 +19,15 @@ func getNow() int64 {
 	return nano / 1000
 }
 
-type recipeController struct {
+type RecipeController struct {
 	producer phloem.Producer
 }
 
-func NewRecipeController(producer phloem.Producer) recipeController {
-	return recipeController { producer }
+func NewRecipeController(producer phloem.Producer) RecipeController {
+	return RecipeController{producer}
 }
 
-func (recipeController recipeController) SaveRecipe(w http.ResponseWriter, r *http.Request) {
+func (recipeController RecipeController) SaveRecipe(w http.ResponseWriter, r *http.Request) {
 	var rec recipe.Recipe
 
 	if err := json.NewDecoder(r.Body).Decode(&rec); err != nil {
@@ -45,7 +45,7 @@ func (recipeController recipeController) SaveRecipe(w http.ResponseWriter, r *ht
 	w.Header().Add("Location", "/recipe/"+rec.Id)
 	w.WriteHeader(http.StatusCreated)
 
-	json.NewEncoder(w).Encode(rec)
-
-	log.Println("Saved!")
+	if err := json.NewEncoder(w).Encode(rec); err != nil {
+		log.Printf("Could not encode response: #{err.Error()}")
+	}
 }

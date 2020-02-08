@@ -20,7 +20,7 @@ func ListenAndRoute(consumer Consumer, eventRouter EventRouter) {
 
 	for run == true {
 		select {
-		case sig := <- sigchan:
+		case sig := <-sigchan:
 			log.Printf("Caught signal %v: terminating\n", sig)
 			run = false
 		default:

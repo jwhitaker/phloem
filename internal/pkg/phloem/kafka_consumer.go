@@ -1,10 +1,8 @@
 package phloem
 
 import (
-	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
-	"os"
 )
 
 // KafkaConsumer is a struct for a KafkaConsumer
@@ -15,23 +13,27 @@ type KafkaConsumer struct {
 // NewKafkaConsumer returns a new kafka consumer
 func NewKafkaConsumer() KafkaConsumer {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost",
+		"bootstrap.servers":     "localhost",
 		"broker.address.family": "v4",
-		"group.id": "a_group",
-		"session.timeout.ms": 6000,
-		"auto.offset.reset": "earliest",
+		"group.id":              "a_group",
+		"session.timeout.ms":    6000,
+		"auto.offset.reset":     "earliest",
 	})
 
 	if err != nil {
 		log.Fatalf("Failed to create consumer: %s\n", err)
 	}
 
-	return KafkaConsumer{ consumer }
+	return KafkaConsumer{consumer}
 }
 
 // Subscribe to the following events
 func (kafkaConsumer KafkaConsumer) Subscribe(events []string) {
-	kafkaConsumer.consumer.SubscribeTopics(events, nil)
+	err := kafkaConsumer.consumer.SubscribeTopics(events, nil)
+
+	if err != nil {
+		log.Fatalf("Could not subscribe to topics: %+v", err)
+	}
 
 	log.Printf("Consuming %+v", events)
 }
@@ -49,14 +51,14 @@ func (kafkaConsumer KafkaConsumer) Poll() *Event {
 	switch e := ev.(type) {
 	case *kafka.Message:
 		event := Event{
-			Event: *e.TopicPartition.Topic,
+			Event:   *e.TopicPartition.Topic,
 			Payload: e.Value,
 		}
 
 		return &event
 
 	case kafka.Error:
-		fmt.Fprintf(os.Stderr, "%% Error: %v: %v\n", e.Code(), e)
+		log.Printf("%% Error: #{e.Code()}: #{e}\n")
 
 	default:
 		log.Printf("Ignored %v\n", e)
@@ -67,5 +69,9 @@ func (kafkaConsumer KafkaConsumer) Poll() *Event {
 
 // Close close the consumer connection to kafka.
 func (kafkaConsumer KafkaConsumer) Close() {
-	kafkaConsumer.consumer.Close()
+	err := kafkaConsumer.consumer.Close()
+
+	if err != nil {
+		log.Fatalf("Could not close consumer %+v", err)
+	}
 }

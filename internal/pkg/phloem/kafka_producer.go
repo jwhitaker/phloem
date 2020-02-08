@@ -1,8 +1,8 @@
 package phloem
 
 import (
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"encoding/json"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 )
 
@@ -13,7 +13,7 @@ type KafkaProducer struct {
 
 // NewKafkaProducer creates a new KafkaProducer instance
 func NewKafkaProducer(configuration KafkaConfiguration) KafkaProducer {
-	producer, err := kafka.NewProducer(&kafka.ConfigMap {
+	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": configuration.BootstrapServers,
 	})
 
@@ -21,7 +21,7 @@ func NewKafkaProducer(configuration KafkaConfiguration) KafkaProducer {
 		log.Fatalf("Failed to create producer: %s\n", err)
 	}
 
-	return KafkaProducer{ producer }
+	return KafkaProducer{producer}
 }
 
 // Send will send a event with the payload
@@ -36,19 +36,19 @@ func (kafkaProducer KafkaProducer) Send(event string, payload interface{}) {
 	log.Printf("%s", rawPayload)
 
 	if err != nil {
-		log.Println("Failed to incode message")
+		log.Println("Failed to encode message")
 		return
 	}
 
 	_ = kafkaProducer.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{
-			Topic: &event,
+			Topic:     &event,
 			Partition: kafka.PartitionAny,
 		},
 		Value: rawPayload,
 	}, deliveryChan)
 
-	e := <- deliveryChan
+	e := <-deliveryChan
 	m := e.(*kafka.Message)
 
 	log.Printf("%+v\n", m)
